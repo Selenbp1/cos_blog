@@ -3,8 +3,8 @@ let index = {
         $("#btn-save").on("click", ()=>{    //function(){},  ()=>{} this를 바인딩하기 위해서!!
             this.save();
         });
-        $("#btn-login").on("click", ()=>{    //function(){},  ()=>{} this를 바인딩하기 위해서!!
-            this.login();
+        $("#btn-update").on("click", ()=>{    //function(){},  ()=>{} this를 바인딩하기 위해서!!
+            this.update();
         });
     },
     save: function(){
@@ -22,34 +22,34 @@ let index = {
         //ajax가 통신을 성공하고 서버가 json을 리턴해주면 자동으로 자바 오브젝트로 변환해줌
         $.ajax({
             type: "POST",
-            url: "/blog/api/user",
+            url: "/auth/joinProc",
             data: JSON.stringify(data), //http body 데이터
             contentType: "application/json; charset=utf-8",  //body 데이터가 어떤 타입인지(MIME)
             dataType: "json"    //요청을 서버로 해서 응답이 왔을 때, 기본적으로 모든 것이 문자열(생긴 게 json이라면) => javascript오브젝트로
         }).done(function(resp){
             alert("회원가입완료!!");
            // console.log(resp);
-            location.href="/blog";
+            location.href="/";
         }).fail(function(error){
             alert(JSON.stringify(error));
         });
     },
-
-    login: function(){
+    update: function(){
         let data = {
-            username: $("#username").val(),
+            id: $("#id").val(),
             password: $("#password").val(),
+            email: $("#email").val()
         };
         $.ajax({
-            type: "POST",
-            url: "/blog/api/user/login",
+            type: "PUT",
+            url: "/user",
             data: JSON.stringify(data),
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }).done(function(resp){
-            alert("로그인완료!!");
+            alert("회원수정완료!!");
             // console.log(resp);
-            location.href="/blog";
+            location.href="/";
         }).fail(function(error){
             alert(JSON.stringify(error));
         });
