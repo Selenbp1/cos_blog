@@ -4,10 +4,6 @@ import com.cos.blog.model.RoleType;
 import com.cos.blog.model.User;
 import com.cos.blog.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +24,16 @@ public class UserService {
         String rawPassword = user.getPassword();    //1234원문
         String encPassword = encoder.encode(rawPassword);   //해쉬
         user.setPassword(encPassword);
+        user.setRole(RoleType.USER);
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User 회원찾기(String username){
+        User user =userRepository.findByUsername(username).orElseGet(()->{
+            return new User();
+        });
+       return user;
     }
 
     @Transactional
@@ -39,10 +44,15 @@ public class UserService {
         User persistance = userRepository.findById(user.getId()).orElseThrow(()->{
             return new IllegalArgumentException("회원찾기실패");
         });
-        String rawPassword = user.getPassword();
-        String encPassword = encoder.encode(rawPassword);
-        persistance.setPassword(encPassword);
-        persistance.setEmail(user.getEmail());
+
+        //Vaildate 체크 => oauth 필드에 값이 없으면 수정 가능
+        if(persistance.getOauth() == null || persistance.getOauth().equals("")){
+            String rawPassword = user.getPassword();
+            String encPassword = encoder.encode(rawPassword);
+            persistance.setPassword(encPassword);
+            persistance.setEmail(user.getEmail());
+        }
+
 
         //회원수정 함수 종료시 = 서비스 종료 = 트랜잭션 종료 = commit 자동
         //영속화된 persistance 객체의 변화가 감지되면 더티체킹되어 update문을 날려줌
